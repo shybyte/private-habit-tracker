@@ -1,0 +1,15 @@
+.app {
+    margin: 10px;
+}
+
+.habit {
+    background: #ffa;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.habitButtons {
+    margin: 0px 5px;
+    float: right;
+}

@@ -4,32 +4,50 @@ import App from './components/App';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
 import PouchDB from 'pouchdb';
+import { Habit, Types } from './model';
 
-const localDB = new PouchDB('kittens');
-const remoteDB = new PouchDB('http://localhost:5984/kittens');
+const localDB = new PouchDB('habits');
+const remoteDB = new PouchDB('http://localhost:5984/habits');
 
 localDB.sync(remoteDB, {
   live: true,
   retry: true
-}).on('change', function (change) {
-  console.log('change', change);
-}).on('error', function (err) {
-  console.error(err);
+}).on('change', change => {
+  console.log('sync change', change);
+}).on('error', err => {
+  console.error('sync error', err);
   console.log(JSON.stringify(err));
 });
 
-function get () {
-  localDB.get('mittens').then(function (doc) {
-    console.log(doc);
-  });
+
+localDB.changes({
+  since: 'now',
+  live: true,
+}).on('change', changes => {
+  console.log('changes', changes);
+  render();
+}).on('error', err => {
+  console.error('changes error', err);
+});
+
+function addHabit() {
+  localDB.post({type: Types.habit, title: 'New'});
 }
 
+function deleteHabit(habit: Habit) {
+  localDB.remove(habit);
+}
 
-ReactDOM.render(
-  <App />,
-  document.getElementById('root') as HTMLElement
-);
+async function render() {
+  const docs = await localDB.allDocs({include_docs: true});
+  const habits: Habit[] = docs.rows.map(doc => doc.doc as any);
+  console.log(docs, habits);
+  ReactDOM.render(
+    <App habits={habits} addHabit={addHabit} deleteHabit={deleteHabit}/>,
+    document.getElementById('root') as HTMLElement
+  );
+
+}
+
 registerServiceWorker();
-
-
-get();
+render();

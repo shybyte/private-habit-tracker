@@ -1,7 +1,14 @@
 import * as React from 'react';
 import './App.css';
+import { Habit } from '../model';
 
-class App extends React.Component<{}, {}> {
+interface AppProps {
+  habits: Habit[];
+  addHabit(): void;
+  deleteHabit(habit: Habit): void;
+}
+
+class App extends React.Component<AppProps, {}> {
   render() {
     return (
       <div className="app">
@@ -9,7 +16,15 @@ class App extends React.Component<{}, {}> {
           <h2>Private Habit Tracker</h2>
         </header>
         <main>
-          Content
+          {this.props.habits.map(habit =>
+            <div className="habit" key={habit._id}>
+              {habit.title}
+              <div className="habitButtons">
+                <button onClick={() => this.props.deleteHabit(habit)}>x</button>
+              </div>
+            </div>
+          )}
+          <button onClick={this.props.addHabit}>+</button>
         </main>
       </div>
     );
