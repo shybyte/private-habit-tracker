@@ -2,18 +2,19 @@ import * as React from 'react';
 import './App.css';
 import { Habit } from '../model';
 import * as R from 'ramda';
+import HabitComponent from './HabitComponent';
 
 interface AppProps {
   habits: Habit[];
-
   addHabit(): void;
-
   deleteHabit(habit: Habit): void;
+  saveHabit(habit: Habit): void;
 }
 
 class App extends React.Component<AppProps, {}> {
   render() {
-    const sortedHabits = R.sortBy(h => h.title, this.props.habits);
+    const props = this.props;
+    const sortedHabits = R.sortBy(h => h.title, props.habits);
     return (
       <div className="app">
         <header className="header">
@@ -21,14 +22,9 @@ class App extends React.Component<AppProps, {}> {
         </header>
         <main>
           {sortedHabits.map(habit =>
-            <div className="habit" key={habit._id}>
-              {habit.title}
-              <div className="habitButtons">
-                <button onClick={() => this.props.deleteHabit(habit)}>x</button>
-              </div>
-            </div>
+            <HabitComponent key={habit._id} habit={habit} deleteHabit={props.deleteHabit} saveHabit={props.saveHabit}/>
           )}
-          <button onClick={this.props.addHabit}>+</button>
+          <button onClick={props.addHabit}>+</button>
         </main>
       </div>
     );

@@ -34,6 +34,10 @@ function addHabit() {
   localDB.post({type: Types.habit, title: 'New'});
 }
 
+function saveHabit(habit: Habit) {
+  localDB.put(habit);
+}
+
 function deleteHabit(habit: Habit) {
   localDB.remove(habit);
 }
@@ -43,7 +47,7 @@ async function render() {
   const habits: Habit[] = docs.rows.map(doc => doc.doc as any);
   console.log(docs, habits);
   ReactDOM.render(
-    <App habits={habits} addHabit={addHabit} deleteHabit={deleteHabit}/>,
+    <App habits={habits} addHabit={addHabit} deleteHabit={deleteHabit} saveHabit={saveHabit} />,
     document.getElementById('root') as HTMLElement
   );
 
