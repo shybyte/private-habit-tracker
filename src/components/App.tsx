@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './App.css';
-import { Habit } from '../model';
+import {Habit, HabitExecution} from '../model';
 import * as R from 'ramda';
 import HabitComponent from './HabitComponent';
 
@@ -9,9 +9,35 @@ interface AppProps {
   addHabit(): void;
   deleteHabit(habit: Habit): void;
   saveHabit(habit: Habit): void;
+  executeHabit(habit: Habit): void;
+  getHabitExecutions(): Promise<HabitExecution[]>;
 }
 
-class App extends React.Component<AppProps, {}> {
+export type ExecutionCounts = { [habitId: string]: number };
+
+interface AppState {
+  executionCounts: ExecutionCounts;
+}
+
+class App extends React.Component<AppProps, AppState> {
+  state = {
+    executionCounts: {}
+  };
+
+  async componentDidMount() {
+    this.updateCounts();
+  }
+
+  componentDidUpdate() {
+    this.updateCounts();
+  }
+
+  async updateCounts() {
+    const habitExecutions = await this.props.getHabitExecutions();
+    console.log('habitExecutions', habitExecutions);
+    this.setState({executionCounts: createExecutionCounts(habitExecutions)});
+  }
+
   render() {
     const props = this.props;
     const sortedHabits = R.sortBy(h => h.title, props.habits);
@@ -22,13 +48,24 @@ class App extends React.Component<AppProps, {}> {
         </header>
         <main>
           {sortedHabits.map(habit =>
-            <HabitComponent key={habit._id} habit={habit} deleteHabit={props.deleteHabit} saveHabit={props.saveHabit}/>
+            <HabitComponent
+              key={habit._id}
+              habit={habit}
+              executionCounts={this.state.executionCounts}
+              deleteHabit={props.deleteHabit}
+              saveHabit={props.saveHabit}
+              executeHabit={props.executeHabit}
+            />
           )}
           <button onClick={props.addHabit}>+</button>
         </main>
       </div>
     );
   }
+}
+
+function createExecutionCounts(executions: HabitExecution[]): ExecutionCounts {
+  return R.countBy(e => e.habitId, executions);
 }
 
 export default App;

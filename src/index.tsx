@@ -4,10 +4,16 @@ import App from './components/App';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
 import PouchDB from 'pouchdb';
-import { Habit, Types } from './model';
+import {Habit, HabitExecution, NewHabitExecution, Types} from './model';
+
+PouchDB.plugin(require('pouchdb-find').default);
 
 const localDB = new PouchDB('habits');
 const remoteDB = new PouchDB('http://localhost:5984/habits');
+
+localDB.createIndex({
+  index: {fields: ['type']}
+});
 
 localDB.sync(remoteDB, {
   live: true,
@@ -42,12 +48,33 @@ function deleteHabit(habit: Habit) {
   localDB.remove(habit);
 }
 
+function executeHabit(habit: Habit) {
+  const newHabitExecution: NewHabitExecution = {
+    type: Types.habitExecution,
+    habitId: habit._id,
+    timestamp: Date.now()
+  };
+  localDB.post(newHabitExecution);
+}
+
+function getHabitExecutions(): Promise<HabitExecution[]> {
+  return localDB.find({selector: {type: Types.habitExecution}})
+    .then(docsResult => docsResult.docs as HabitExecution[]);
+}
+
 async function render() {
-  const docs = await localDB.allDocs({include_docs: true});
-  const habits: Habit[] = docs.rows.map(doc => doc.doc as any);
-  console.log(docs, habits);
+  const habitsResult = await localDB.find({selector: {type: Types.habit}});
+  const habits = habitsResult.docs as Habit[];
+  console.log(habits);
   ReactDOM.render(
-    <App habits={habits} addHabit={addHabit} deleteHabit={deleteHabit} saveHabit={saveHabit} />,
+    <App
+      habits={habits}
+      addHabit={addHabit}
+      deleteHabit={deleteHabit}
+      saveHabit={saveHabit}
+      executeHabit={executeHabit}
+      getHabitExecutions={getHabitExecutions}
+    />,
     document.getElementById('root') as HTMLElement
   );
 
