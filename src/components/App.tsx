@@ -1,22 +1,26 @@
 import * as React from 'react';
 import './App.css';
-import { Habit } from '../model';
+import {Habit} from '../model';
+import * as R from 'ramda'
 
 interface AppProps {
   habits: Habit[];
+
   addHabit(): void;
+
   deleteHabit(habit: Habit): void;
 }
 
 class App extends React.Component<AppProps, {}> {
   render() {
+    const sortedHabits = R.sortBy(h => h.title, this.props.habits);
     return (
       <div className="app">
         <header className="header">
           <h2>Private Habit Tracker</h2>
         </header>
         <main>
-          {this.props.habits.map(habit =>
+          {sortedHabits.map(habit =>
             <div className="habit" key={habit._id}>
               {habit.title}
               <div className="habitButtons">
