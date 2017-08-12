@@ -1,7 +1,7 @@
 import * as React from 'react';
 import './App.css';
-import {Habit} from '../model';
-import * as R from 'ramda'
+import { Habit } from '../model';
+import * as R from 'ramda';
 
 interface AppProps {
   habits: Habit[];
