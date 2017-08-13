@@ -3,6 +3,7 @@ import './App.css';
 import {Habit, HabitExecution} from '../model';
 import * as R from 'ramda';
 import HabitComponent from './HabitComponent';
+import {getDateRangeOfDay, MILLISECONDS_IN_DAY, TimeRange} from '../utils';
 
 interface AppProps {
   habits: Habit[];
@@ -10,20 +11,20 @@ interface AppProps {
   deleteHabit(habit: Habit): void;
   saveHabit(habit: Habit): void;
   executeHabit(habit: Habit): void;
-  getHabitExecutions(): Promise<HabitExecution[]>;
+  getHabitExecutions(timeRange: TimeRange): Promise<HabitExecution[]>;
 }
 
 export type ExecutionCounts = { [habitId: string]: number };
 
 interface AppState {
   executionCounts: ExecutionCounts;
-  day: number;
+  selectedDay: number;  // 0 = today, -1 = yesterday ...
 }
 
 class App extends React.Component<AppProps, AppState> {
   state = {
     executionCounts: {},
-    day: 0
+    selectedDay: 0
   };
 
   async componentDidMount() {
@@ -35,18 +36,21 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   async updateCounts() {
-    const habitExecutions = await this.props.getHabitExecutions();
+    const habitExecutions = await this.props.getHabitExecutions(getDateRangeOfDay(this.selectedDate()));
     console.log('habitExecutions', habitExecutions);
     this.setState({executionCounts: createExecutionCounts(habitExecutions)});
   }
 
+  selectedDate = () => new Date(Date.now() + this.state.selectedDay * MILLISECONDS_IN_DAY);
+
   render() {
     const props = this.props;
+    const state = this.state;
     const sortedHabits = R.sortBy(h => h.title, props.habits);
-    const displayedDate = new Date(Date.now() - this.state.day * 1000 * 60 * 60 * 24);
-    const displayedDateString = displayedDate.getDate() + '.'
-      + (displayedDate.getMonth() + 1) + '.'
-      + displayedDate.getFullYear();
+    const selectedDate = this.selectedDate();
+    const selectedDateString = selectedDate.getDate() + '.'
+      + (selectedDate.getMonth() + 1) + '.'
+      + selectedDate.getFullYear();
     return (
       <div className="app">
         <header className="header">
@@ -54,7 +58,9 @@ class App extends React.Component<AppProps, AppState> {
         </header>
         <main>
           <div className="selectedDate">
-            {displayedDateString}
+            <button onClick={() => this.changeDayByDelta(-1)}>&lt;</button>
+            {selectedDateString}
+            <button disabled={state.selectedDay >= 0} onClick={() => this.changeDayByDelta(1)}>&gt;</button>
           </div>
           {sortedHabits.map(habit =>
             <HabitComponent
@@ -70,6 +76,10 @@ class App extends React.Component<AppProps, AppState> {
         </main>
       </div>
     );
+  }
+
+  private changeDayByDelta(delta: number) {
+    this.setState({selectedDay: this.state.selectedDay + delta}, () => this.updateCounts());
   }
 }
 

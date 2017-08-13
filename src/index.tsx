@@ -5,6 +5,7 @@ import registerServiceWorker from './registerServiceWorker';
 import './index.css';
 import PouchDB from 'pouchdb';
 import {Habit, HabitExecution, NewHabitExecution, Types} from './model';
+import {TimeRange} from './utils';
 
 PouchDB.plugin(require('pouchdb-find').default);
 
@@ -12,7 +13,7 @@ const localDB = new PouchDB('habits');
 const remoteDB = new PouchDB('http://localhost:5984/habits');
 
 localDB.createIndex({
-  index: {fields: ['type']}
+  index: {fields: ['type', 'timestamp']}
 });
 
 localDB.sync(remoteDB, {
@@ -57,9 +58,13 @@ function executeHabit(habit: Habit) {
   localDB.post(newHabitExecution);
 }
 
-function getHabitExecutions(): Promise<HabitExecution[]> {
-  return localDB.find({selector: {type: Types.habitExecution}})
-    .then(docsResult => docsResult.docs as HabitExecution[]);
+function getHabitExecutions(timeRange: TimeRange): Promise<HabitExecution[]> {
+  return localDB.find({
+    selector: {
+      type: Types.habitExecution,
+      timestamp: {$gt: timeRange.start, $lt: timeRange.end}
+    }
+  }).then(docsResult => docsResult.docs as HabitExecution[]);
 }
 
 async function render() {
