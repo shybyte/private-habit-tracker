@@ -49,11 +49,11 @@ function deleteHabit(habit: Habit) {
   localDB.remove(habit);
 }
 
-function executeHabit(habit: Habit) {
+function executeHabit(habit: Habit, date = new Date()) {
   const newHabitExecution: NewHabitExecution = {
     type: Types.habitExecution,
     habitId: habit._id,
-    timestamp: Date.now()
+    timestamp: date.getTime()
   };
   localDB.post(newHabitExecution);
 }

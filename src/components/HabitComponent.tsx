@@ -8,7 +8,7 @@ interface HabitComponentProps {
   executionCounts: ExecutionCounts;
   deleteHabit(habit: Habit): void;
   saveHabit(habit: Habit): void;
-  executeHabit(habit: Habit): void;
+  executeHabit(): void;
 }
 
 interface HabitComponentState {
@@ -52,7 +52,7 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
           : <span onClick={this.startEditing}>{habit.title}</span>
         }
         <div className="habitButtons">
-          <button onClick={() => this.props.executeHabit(habit)}>{count || '+'}</button>
+          <button onClick={() => this.props.executeHabit()}>{count || '+'}</button>
           <button onClick={() => this.props.deleteHabit(habit)}>x</button>
         </div>
       </div>

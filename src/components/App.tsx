@@ -10,7 +10,7 @@ interface AppProps {
   addHabit(): void;
   deleteHabit(habit: Habit): void;
   saveHabit(habit: Habit): void;
-  executeHabit(habit: Habit): void;
+  executeHabit(habit: Habit, date?: Date): void;
   getHabitExecutions(timeRange: TimeRange): Promise<HabitExecution[]>;
 }
 
@@ -43,6 +43,10 @@ class App extends React.Component<AppProps, AppState> {
 
   selectedDate = () => new Date(Date.now() + this.state.selectedDay * MILLISECONDS_IN_DAY);
 
+  executeHabit = (habit: Habit) => {
+    this.props.executeHabit(habit, this.selectedDate());
+  }
+
   render() {
     const props = this.props;
     const state = this.state;
@@ -69,7 +73,7 @@ class App extends React.Component<AppProps, AppState> {
               executionCounts={this.state.executionCounts}
               deleteHabit={props.deleteHabit}
               saveHabit={props.saveHabit}
-              executeHabit={props.executeHabit}
+              executeHabit={() => this.executeHabit(habit)}
             />
           )}
           <button onClick={props.addHabit}>+</button>
