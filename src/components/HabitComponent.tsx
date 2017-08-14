@@ -14,23 +14,25 @@ interface HabitComponentProps {
 }
 
 interface HabitComponentState {
-  editing: boolean;
+  editingTitle: boolean;
 }
 
 class HabitComponent extends React.Component<HabitComponentProps, HabitComponentState> {
   state = {
-    editing: false
+    editingTitle: false
   };
   titleInput: HTMLInputElement;
 
-  startEditing = () => {
-    this.setState({editing: true});
+  startEditingTitle = () => {
+    if (this.props.editMode) {
+      this.setState({editingTitle: true});
+    }
   }
 
   onSubmit = (ev: React.SyntheticEvent<{}>) => {
     ev.preventDefault();
     this.props.store.saveHabit({...this.props.habit, title: this.titleInput.value});
-    this.setState({editing: false});
+    this.setState({editingTitle: false});
   }
 
 
@@ -40,7 +42,7 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
     const children = habits.filter(h => h.parentId === habit._id);
     return (
       <div className="habit" key={habit._id}>
-        {this.state.editing ?
+        {this.state.editingTitle ?
           <form onSubmit={this.onSubmit}>
             <input
               defaultValue={habit.title}
@@ -52,7 +54,7 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
               }}
             />
           </form>
-          : <span onClick={this.startEditing}>{habit.title}</span>
+          : <span onClick={this.startEditingTitle}>{habit.title}</span>
         }
         <div className="habitButtons">
           <button onClick={() => store.executeHabit(habit)}>{count || '+'}</button>
