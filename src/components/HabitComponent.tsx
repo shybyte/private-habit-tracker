@@ -1,14 +1,15 @@
+import * as R from 'ramda';
 import * as React from 'react';
 import './HabitComponent.css';
 import {Habit} from '../model';
 import {ExecutionCounts} from './App';
+import {Store} from '../store';
 
 interface HabitComponentProps {
+  habits: Habit[];
   habit: Habit;
   executionCounts: ExecutionCounts;
-  deleteHabit(habit: Habit): void;
-  saveHabit(habit: Habit): void;
-  executeHabit(): void;
+  store: Store;
 }
 
 interface HabitComponentState {
@@ -27,14 +28,15 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
 
   onSubmit = (ev: React.SyntheticEvent<{}>) => {
     ev.preventDefault();
-    this.props.saveHabit({...this.props.habit, title: this.titleInput.value});
+    this.props.store.saveHabit({...this.props.habit, title: this.titleInput.value});
     this.setState({editing: false});
   }
 
 
-  render() {
-    const {habit, executionCounts} = this.props;
+  render(): JSX.Element {
+    const {habit, executionCounts, store, habits} = this.props;
     const count = executionCounts[habit._id];
+    const children = habits.filter(h => h.parentId === habit._id);
     return (
       <div className="habit" key={habit._id}>
         {this.state.editing ?
@@ -52,9 +54,23 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
           : <span onClick={this.startEditing}>{habit.title}</span>
         }
         <div className="habitButtons">
-          <button onClick={() => this.props.executeHabit()}>{count || '+'}</button>
-          <button onClick={() => this.props.deleteHabit(habit)}>x</button>
+          <button onClick={() => store.executeHabit(habit)}>{count || '+'}</button>
+          <button onClick={() => store.addHabit(habit._id)}>New</button>
+          <button onClick={() => store.deleteHabit(habit)}>x</button>
         </div>
+
+        {!R.isEmpty(children) ? (
+          <div>
+            {children.map(childHabit =>
+              <HabitComponent
+                key={childHabit._id}
+                habit={childHabit}
+                habits={habits}
+                store={store}
+                executionCounts={executionCounts}
+              />)}
+          </div>) : []}
+
       </div>
     );
   }

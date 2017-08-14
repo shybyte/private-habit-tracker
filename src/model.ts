@@ -8,9 +8,13 @@ export interface PouchDocument {
   _rev: string;
 }
 
-export interface Habit extends PouchDocument {
+export interface NewHabit {
   type: Types.habit;
   title: string;
+  parentId?: string;
+}
+
+export interface Habit extends NewHabit, PouchDocument {
 }
 
 
@@ -24,3 +28,7 @@ export interface HabitExecution extends PouchDocument, NewHabitExecution {
 }
 
 export type AppPouchDocument = Habit | HabitExecution;
+
+export function isRootHabit(habit: Habit) {
+  return !habit.parentId;
+}

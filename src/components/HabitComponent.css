@@ -6,7 +6,12 @@
     overflow: hidden;
 }
 
+.habit .habit {
+    padding: 0 0 0 10px;
+}
+
 .habitButtons {
     margin: 0px 5px;
     float: right;
 }
+

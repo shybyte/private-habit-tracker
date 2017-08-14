@@ -3,82 +3,17 @@ import * as ReactDOM from 'react-dom';
 import App from './components/App';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
-import PouchDB from 'pouchdb';
-import {Habit, HabitExecution, NewHabitExecution, Types} from './model';
-import {TimeRange} from './utils';
+import {Store} from './store';
 
-PouchDB.plugin(require('pouchdb-find').default);
-
-const localDB = new PouchDB('habits');
-const remoteDB = new PouchDB('http://localhost:5984/habits');
-
-localDB.createIndex({
-  index: {fields: ['type', 'timestamp']}
-});
-
-localDB.sync(remoteDB, {
-  live: true,
-  retry: true
-}).on('change', change => {
-  console.log('sync change', change);
-}).on('error', err => {
-  console.error('sync error', err);
-  console.log(JSON.stringify(err));
-});
-
-
-localDB.changes({
-  since: 'now',
-  live: true,
-}).on('change', changes => {
-  console.log('changes', changes);
-  render();
-}).on('error', err => {
-  console.error('changes error', err);
-});
-
-function addHabit() {
-  localDB.post({type: Types.habit, title: 'New'});
-}
-
-function saveHabit(habit: Habit) {
-  localDB.put(habit);
-}
-
-function deleteHabit(habit: Habit) {
-  localDB.remove(habit);
-}
-
-function executeHabit(habit: Habit, date = new Date()) {
-  const newHabitExecution: NewHabitExecution = {
-    type: Types.habitExecution,
-    habitId: habit._id,
-    timestamp: date.getTime()
-  };
-  localDB.post(newHabitExecution);
-}
-
-function getHabitExecutions(timeRange: TimeRange): Promise<HabitExecution[]> {
-  return localDB.find({
-    selector: {
-      type: Types.habitExecution,
-      timestamp: {$gt: timeRange.start, $lt: timeRange.end}
-    }
-  }).then(docsResult => docsResult.docs as HabitExecution[]);
-}
+const store = new Store(render);
 
 async function render() {
-  const habitsResult = await localDB.find({selector: {type: Types.habit}});
-  const habits = habitsResult.docs as Habit[];
+  const habits = await store.getHabits();
   console.log(habits);
   ReactDOM.render(
     <App
       habits={habits}
-      addHabit={addHabit}
-      deleteHabit={deleteHabit}
-      saveHabit={saveHabit}
-      executeHabit={executeHabit}
-      getHabitExecutions={getHabitExecutions}
+      store={store}
     />,
     document.getElementById('root') as HTMLElement
   );

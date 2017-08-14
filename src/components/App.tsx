@@ -1,17 +1,14 @@
 import * as React from 'react';
 import './App.css';
-import {Habit, HabitExecution} from '../model';
+import {Habit, HabitExecution, isRootHabit} from '../model';
 import * as R from 'ramda';
 import HabitComponent from './HabitComponent';
-import {getDateRangeOfDay, MILLISECONDS_IN_DAY, TimeRange} from '../utils';
+import {getDateRangeOfDay, MILLISECONDS_IN_DAY} from '../utils';
+import {Store} from '../store';
 
 interface AppProps {
   habits: Habit[];
-  addHabit(): void;
-  deleteHabit(habit: Habit): void;
-  saveHabit(habit: Habit): void;
-  executeHabit(habit: Habit, date?: Date): void;
-  getHabitExecutions(timeRange: TimeRange): Promise<HabitExecution[]>;
+  store: Store;
 }
 
 export type ExecutionCounts = { [habitId: string]: number };
@@ -36,21 +33,17 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   async updateCounts() {
-    const habitExecutions = await this.props.getHabitExecutions(getDateRangeOfDay(this.selectedDate()));
+    const habitExecutions = await this.props.store.getHabitExecutions(getDateRangeOfDay(this.selectedDate()));
     console.log('habitExecutions', habitExecutions);
     this.setState({executionCounts: createExecutionCounts(habitExecutions)});
   }
 
   selectedDate = () => new Date(Date.now() + this.state.selectedDay * MILLISECONDS_IN_DAY);
 
-  executeHabit = (habit: Habit) => {
-    this.props.executeHabit(habit, this.selectedDate());
-  }
-
   render() {
     const props = this.props;
     const state = this.state;
-    const sortedHabits = R.sortBy(h => h.title, props.habits);
+    const sortedRootHabits = R.sortBy(h => h.title, props.habits.filter(isRootHabit));
     const selectedDate = this.selectedDate();
     const selectedDateString = selectedDate.getDate() + '.'
       + (selectedDate.getMonth() + 1) + '.'
@@ -66,17 +59,16 @@ class App extends React.Component<AppProps, AppState> {
             {selectedDateString}
             <button disabled={state.selectedDay >= 0} onClick={() => this.changeDayByDelta(1)}>&gt;</button>
           </div>
-          {sortedHabits.map(habit =>
+          {sortedRootHabits.map(habit =>
             <HabitComponent
               key={habit._id}
               habit={habit}
+              habits={props.habits}
               executionCounts={this.state.executionCounts}
-              deleteHabit={props.deleteHabit}
-              saveHabit={props.saveHabit}
-              executeHabit={() => this.executeHabit(habit)}
+              store={props.store}
             />
           )}
-          <button onClick={props.addHabit}>+</button>
+          <button onClick={() => props.store.addHabit()}>+</button>
         </main>
       </div>
     );
