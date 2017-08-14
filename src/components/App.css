@@ -11,3 +11,7 @@
 .selectedDate button {
     margin: 0 5px;
 }
+
+.logoutButton {
+    float: right;
+}

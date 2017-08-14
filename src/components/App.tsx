@@ -5,10 +5,12 @@ import * as R from 'ramda';
 import HabitComponent from './HabitComponent';
 import {getDateRangeOfDay, MILLISECONDS_IN_DAY} from '../utils';
 import {Store} from '../store';
+import Login from './Login';
 
 interface AppProps {
   habits: Habit[];
   store: Store;
+  isLoggedIn: boolean;
 }
 
 export type ExecutionCounts = { [habitId: string]: number };
@@ -46,6 +48,10 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({editMode: ev.currentTarget.checked});
   }
 
+  onLogout = () => {
+    this.props.store.logout();
+  }
+
   render() {
     const props = this.props;
     const state = this.state;
@@ -58,7 +64,11 @@ class App extends React.Component<AppProps, AppState> {
     return (
       <div className="app">
         <header className="header">
+          {props.isLoggedIn ? <button className="logoutButton" onClick={this.onLogout}>Logout</button> :
+            []}
           <h2>Private Habit Tracker</h2>
+          {props.isLoggedIn ? [] :
+            <Login store={props.store}/>}
           <label className="editModeCheckbox">
             <input type="checkbox" checked={editMode} onClick={this.onClickEditModeCheckBox}/> Edit
           </label>
