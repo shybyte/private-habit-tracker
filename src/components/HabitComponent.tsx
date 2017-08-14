@@ -10,6 +10,7 @@ interface HabitComponentProps {
   habit: Habit;
   executionCounts: ExecutionCounts;
   store: Store;
+  editMode: boolean;
 }
 
 interface HabitComponentState {
@@ -34,7 +35,7 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
 
 
   render(): JSX.Element {
-    const {habit, executionCounts, store, habits} = this.props;
+    const {habit, executionCounts, store, habits, editMode} = this.props;
     const count = executionCounts[habit._id];
     const children = habits.filter(h => h.parentId === habit._id);
     return (
@@ -55,19 +56,17 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
         }
         <div className="habitButtons">
           <button onClick={() => store.executeHabit(habit)}>{count || '+'}</button>
-          <button onClick={() => store.addHabit(habit._id)}>New</button>
-          <button onClick={() => store.deleteHabit(habit)}>x</button>
+          {editMode ? <button onClick={() => store.addHabit(habit._id)}>New</button> : []}
+          {editMode ? <button onClick={() => store.deleteHabit(habit)}>x</button> : []}
         </div>
 
         {!R.isEmpty(children) ? (
           <div>
             {children.map(childHabit =>
               <HabitComponent
+                {...this.props}
                 key={childHabit._id}
                 habit={childHabit}
-                habits={habits}
-                store={store}
-                executionCounts={executionCounts}
               />)}
           </div>) : []}
 

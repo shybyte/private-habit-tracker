@@ -16,12 +16,14 @@ export type ExecutionCounts = { [habitId: string]: number };
 interface AppState {
   executionCounts: ExecutionCounts;
   selectedDay: number;  // 0 = today, -1 = yesterday ...
+  editMode: boolean;
 }
 
 class App extends React.Component<AppProps, AppState> {
   state = {
     executionCounts: {},
-    selectedDay: 0
+    selectedDay: 0,
+    editMode: false,
   };
 
   async componentDidMount() {
@@ -40,9 +42,14 @@ class App extends React.Component<AppProps, AppState> {
 
   selectedDate = () => new Date(Date.now() + this.state.selectedDay * MILLISECONDS_IN_DAY);
 
+  onClickEditModeCheckBox = (ev: React.SyntheticEvent<HTMLInputElement>) => {
+    this.setState({editMode: ev.currentTarget.checked});
+  }
+
   render() {
     const props = this.props;
     const state = this.state;
+    const {editMode} = state;
     const sortedRootHabits = R.sortBy(h => h.title, props.habits.filter(isRootHabit));
     const selectedDate = this.selectedDate();
     const selectedDateString = selectedDate.getDate() + '.'
@@ -52,13 +59,16 @@ class App extends React.Component<AppProps, AppState> {
       <div className="app">
         <header className="header">
           <h2>Private Habit Tracker</h2>
-        </header>
-        <main>
+          <label className="editModeCheckbox">
+            <input type="checkbox" checked={editMode} onClick={this.onClickEditModeCheckBox}/> Edit
+          </label>
           <div className="selectedDate">
             <button onClick={() => this.changeDayByDelta(-1)}>&lt;</button>
             {selectedDateString}
             <button disabled={state.selectedDay >= 0} onClick={() => this.changeDayByDelta(1)}>&gt;</button>
           </div>
+        </header>
+        <main>
           {sortedRootHabits.map(habit =>
             <HabitComponent
               key={habit._id}
@@ -66,9 +76,10 @@ class App extends React.Component<AppProps, AppState> {
               habits={props.habits}
               executionCounts={this.state.executionCounts}
               store={props.store}
+              editMode={editMode}
             />
           )}
-          <button onClick={() => props.store.addHabit()}>+</button>
+          {editMode ? <button onClick={() => props.store.addHabit()}>+</button> : []}
         </main>
       </div>
     );
