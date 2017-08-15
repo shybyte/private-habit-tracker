@@ -2,6 +2,7 @@
   "name": "private-habit-tracker",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://shybyte.github.io/private-habit-tracker",
   "dependencies": {
     "@types/jest": "^20.0.6",
     "@types/lodash.throttle": "^4.1.2",
@@ -11,6 +12,7 @@
     "@types/ramda": "github:types/npm-ramda",
     "@types/react": "^16.0.2",
     "@types/react-dom": "^15.5.2",
+    "gh-pages": "^1.0.0",
     "lodash.throttle": "^4.1.1",
     "pouchdb": "^6.3.4",
     "pouchdb-authentication": "^0.5.5",
@@ -29,6 +31,8 @@
     "tsc": "tsc",
     "tscWatch": "tsc -w",
     "tslint": "tslint 'src/**/*.ts' 'src/**/*.tsx'",
-    "tslintFix": "tslint --fix 'src/**/*.ts' 'src/**/*.tsx'"
+    "tslintFix": "tslint --fix 'src/**/*.ts' 'src/**/*.tsx'",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   }
 }
