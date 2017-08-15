@@ -5,12 +5,20 @@ import PouchDB from 'pouchdb';
 PouchDB.plugin(require('pouchdb-find').default);
 PouchDB.plugin(require('pouchdb-authentication'));
 
+interface DatabaseConfig {
+  localDB: string;
+  remoteDB: string;
+}
+
 export class Store {
-  localDB = new PouchDB('habits');
-  remoteDB = new PouchDB('http://localhost:5984/habits');
+  localDB: PouchDB.Database;
+  remoteDB: PouchDB.Database;
   syncEmitter: PouchDB.Replication.Sync<any>;
 
-  constructor(private onChange: Function) {
+  constructor(config: DatabaseConfig, private onChange: Function) {
+    this.localDB = new PouchDB(config.localDB);
+    this.remoteDB = new PouchDB(config.remoteDB);
+
     this.localDB.createIndex({
       index: {fields: ['type', 'timestamp']}
     });

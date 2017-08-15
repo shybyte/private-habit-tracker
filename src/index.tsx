@@ -4,9 +4,17 @@ import App from './components/App';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
 import {Store} from './store';
+import {getUrlParameter} from './utils';
+
 const throttle = require('lodash.throttle');
 
-const store = new Store(throttle(render, 500));
+const store = new Store(
+  {
+    localDB: getUrlParameter('localdb') || 'habits',
+    remoteDB: getUrlParameter('remotedb') || 'http://localhost:5984/habits'
+  },
+  throttle(render, 500)
+);
 
 async function render() {
   const habits = await store.getHabits();
