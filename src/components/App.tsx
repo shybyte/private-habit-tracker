@@ -11,6 +11,7 @@ interface AppProps {
   habits: Habit[];
   store: Store;
   isLoggedIn: boolean;
+  isOnline: boolean;
 }
 
 export type ExecutionCounts = { [habitId: string]: number };
@@ -54,6 +55,7 @@ class App extends React.Component<AppProps, AppState> {
 
   render() {
     const props = this.props;
+    const {isLoggedIn, isOnline} = props;
     const state = this.state;
     const {editMode} = state;
     const sortedRootHabits = R.sortBy(h => h.title, props.habits.filter(isRootHabit));
@@ -64,11 +66,11 @@ class App extends React.Component<AppProps, AppState> {
     return (
       <div className="app">
         <header className="header">
-          {props.isLoggedIn ? <button className="logoutButton" onClick={this.onLogout}>Logout</button> :
+          {isLoggedIn && isOnline ? <button className="logoutButton" onClick={this.onLogout}>Logout</button> :
             []}
+          {isOnline ? [] : <span className="offlineMarker">Offline</span>}
           <h2>Private Habit Tracker</h2>
-          {props.isLoggedIn ? [] :
-            <Login store={props.store}/>}
+          {isOnline && !isLoggedIn ? <Login store={props.store}/> : []}
           <label className="editModeCheckbox">
             <input type="checkbox" checked={editMode} onClick={this.onClickEditModeCheckBox}/> Edit
           </label>
