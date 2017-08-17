@@ -18,8 +18,11 @@ export interface Habit extends NewHabit, PouchDocument {
 }
 
 
-export interface NewHabitExecution {
+export interface NewHabitExecution extends HabitExecutionContent {
   type: Types.habitExecution;
+}
+
+export interface HabitExecutionContent {
   habitId: string;
   timestamp: number;
 }

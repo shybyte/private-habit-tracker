@@ -6,6 +6,7 @@ import registerServiceWorker from './registerServiceWorker';
 import './index.css';
 import {Store} from './store';
 import {getUrlParameter} from './utils';
+import {createHabitTree} from './habit-tree';
 
 const throttle = require('lodash.throttle');
 
@@ -24,7 +25,7 @@ function init() {
     console.log(habits);
     ReactDOM.render(
       <App
-        habits={habits}
+        habitTree={createHabitTree(habits)}
         store={store}
         isLoggedIn={isLoggedIn}
         isOnline={window.navigator.onLine}

@@ -1,13 +1,13 @@
 import * as R from 'ramda';
 import * as React from 'react';
 import './HabitComponent.css';
-import {Habit} from '../model';
 import {ExecutionCounts} from './App';
 import {Store} from '../store';
+import {HabitTree, HabitTreeNode} from '../habit-tree';
 
 interface HabitComponentProps {
-  habits: Habit[];
-  habit: Habit;
+  habitTree: HabitTree;
+  habitNode: HabitTreeNode;
   executionCounts: ExecutionCounts;
   store: Store;
   editMode: boolean;
@@ -31,15 +31,16 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
 
   onSubmit = (ev: React.SyntheticEvent<{}>) => {
     ev.preventDefault();
-    this.props.store.saveHabit({...this.props.habit, title: this.titleInput.value});
+    this.props.store.saveHabit({...this.props.habitNode.habit, title: this.titleInput.value});
     this.setState({editingTitle: false});
   }
 
 
   render(): JSX.Element {
-    const {habit, executionCounts, store, habits, editMode} = this.props;
+    const {habitNode, executionCounts, store, habitTree, editMode} = this.props;
+    const habit = habitNode.habit;
     const count = executionCounts[habit._id];
-    const children = habits.filter(h => h.parentId === habit._id);
+    const children = habitNode.children.map(id => habitTree.habitTreeNodes[id]);
     return (
       <div className="habit" key={habit._id}>
         {this.state.editingTitle ?
@@ -64,11 +65,11 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
 
         {!R.isEmpty(children) ? (
           <div>
-            {children.map(childHabit =>
+            {children.map(childHabitNode =>
               <HabitComponent
                 {...this.props}
-                key={childHabit._id}
-                habit={childHabit}
+                key={childHabitNode.habit._id}
+                habitNode={childHabitNode}
               />)}
           </div>) : []}
 

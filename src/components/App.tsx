@@ -1,14 +1,15 @@
 import * as React from 'react';
 import './App.css';
-import {Habit, HabitExecution, isRootHabit} from '../model';
+import {HabitExecution} from '../model';
 import * as R from 'ramda';
 import HabitComponent from './HabitComponent';
 import {getDateRangeOfDay, MILLISECONDS_IN_DAY} from '../utils';
 import {Store} from '../store';
 import Login from './Login';
+import {HabitTree, isRootNode} from '../habit-tree';
 
 interface AppProps {
-  habits: Habit[];
+  habitTree: HabitTree;
   store: Store;
   isLoggedIn: boolean;
   isOnline: boolean;
@@ -58,7 +59,7 @@ class App extends React.Component<AppProps, AppState> {
     const {isLoggedIn, isOnline} = props;
     const state = this.state;
     const {editMode} = state;
-    const sortedRootHabits = R.sortBy(h => h.title, props.habits.filter(isRootHabit));
+    const sortedRootHabits = R.sortBy(n => n.habit.title, R.values(props.habitTree.habitTreeNodes).filter(isRootNode));
     const selectedDate = this.selectedDate();
     const selectedDateString = selectedDate.getDate() + '.'
       + (selectedDate.getMonth() + 1) + '.'
@@ -81,11 +82,11 @@ class App extends React.Component<AppProps, AppState> {
           </div>
         </header>
         <main>
-          {sortedRootHabits.map(habit =>
+          {sortedRootHabits.map(habitNode =>
             <HabitComponent
-              key={habit._id}
-              habit={habit}
-              habits={props.habits}
+              key={habitNode.habit._id}
+              habitNode={habitNode}
+              habitTree={props.habitTree}
               executionCounts={this.state.executionCounts}
               store={props.store}
               editMode={editMode}
