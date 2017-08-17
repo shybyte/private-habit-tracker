@@ -4,9 +4,12 @@ import './HabitComponent.css';
 import {ExecutionCounts} from './App';
 import {Store} from '../store';
 import {HabitTree, HabitTreeNode} from '../habit-tree';
+import {LatestHabitExecutions} from '../model';
+import TimeAgo from 'react-timeago';
 
 interface HabitComponentProps {
   habitTree: HabitTree;
+  latestHabitExecutions: LatestHabitExecutions;
   habitNode: HabitTreeNode;
   executionCounts: ExecutionCounts;
   store: Store;
@@ -41,6 +44,7 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
     const habit = habitNode.habit;
     const count = executionCounts[habit._id];
     const children = habitNode.children.map(id => habitTree.habitTreeNodes[id]);
+    const latestExecution = this.props.latestHabitExecutions[habit._id];
     return (
       <div className="habit" key={habit._id}>
         {this.state.editingTitle ?
@@ -57,6 +61,7 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
           </form>
           : <span onClick={this.startEditingTitle}>{habit.title}</span>
         }
+        {latestExecution ? <TimeAgo className="timeAgo" date={new Date(latestExecution.timestamp)}/>  : ''}
         <div className="habitButtons">
           <button onClick={() => store.executeHabit(habit)}>{count || '+'}</button>
           {editMode ? <button onClick={() => store.addHabit(habit._id)}>New</button> : []}

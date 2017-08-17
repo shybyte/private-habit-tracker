@@ -22,10 +22,13 @@ function init() {
   async function render() {
     const habits = await store.getHabits();
     let isLoggedIn = await store.isLoggedIn().catch(R.always(false));
-    console.log(habits);
+    const latestHabitExecutions = await store.getLatestHabitExecutions(habits.map(h => h._id));
+    console.log('habits', habits);
+    console.log('latestHabitExecutions', latestHabitExecutions);
     ReactDOM.render(
       <App
         habitTree={createHabitTree(habits)}
+        latestHabitExecutions={latestHabitExecutions}
         store={store}
         isLoggedIn={isLoggedIn}
         isOnline={window.navigator.onLine}
@@ -38,7 +41,7 @@ function init() {
 
   render();
 
-  window.addEventListener('online',  render);
+  window.addEventListener('online', render);
   window.addEventListener('offline', render);
 }
 

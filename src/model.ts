@@ -35,3 +35,5 @@ export type AppPouchDocument = Habit | HabitExecution;
 export function isRootHabit(habit: Habit) {
   return !habit.parentId;
 }
+
+export type LatestHabitExecutions = { [habbitId: string]: HabitExecution};

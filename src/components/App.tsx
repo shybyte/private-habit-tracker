@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './App.css';
-import {HabitExecution} from '../model';
+import {HabitExecution, LatestHabitExecutions} from '../model';
 import * as R from 'ramda';
 import HabitComponent from './HabitComponent';
 import {getDateRangeOfDay, MILLISECONDS_IN_DAY} from '../utils';
@@ -10,6 +10,7 @@ import {HabitTree, isRootNode} from '../habit-tree';
 
 interface AppProps {
   habitTree: HabitTree;
+  latestHabitExecutions: LatestHabitExecutions;
   store: Store;
   isLoggedIn: boolean;
   isOnline: boolean;
@@ -87,6 +88,7 @@ class App extends React.Component<AppProps, AppState> {
               key={habitNode.habit._id}
               habitNode={habitNode}
               habitTree={props.habitTree}
+              latestHabitExecutions={props.latestHabitExecutions}
               executionCounts={this.state.executionCounts}
               store={props.store}
               editMode={editMode}

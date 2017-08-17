@@ -18,3 +18,9 @@
 .editModeCheckbox {
     float: right;
 }
+
+.timeAgo {
+    padding-left: 0.5em;
+    color: #aaa;
+    font-size: 0.8em;
+}

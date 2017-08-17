@@ -20,7 +20,8 @@
     "ramda": "^0.24.1",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
-    "react-scripts-ts": "2.5.0"
+    "react-scripts-ts": "2.5.0",
+    "react-timeago": "^3.4.3"
   },
   "devDependencies": {
     "mocha": "^3.5.0",

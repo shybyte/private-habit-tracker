@@ -1,5 +1,6 @@
-import {Habit, HabitExecution, NewHabit, NewHabitExecution, Types} from './model';
+import {Habit, HabitExecution, LatestHabitExecutions, NewHabit, NewHabitExecution, Types} from './model';
 import {TimeRange} from './utils';
+import * as R from 'ramda';
 import PouchDB from 'pouchdb';
 
 PouchDB.plugin(require('pouchdb-find').default);
@@ -21,6 +22,9 @@ export class Store {
 
     this.localDB.createIndex({
       index: {fields: ['type', 'timestamp']}
+    });
+    this.localDB.createIndex({
+      index: {fields: ['timestamp', 'habitId']}
     });
 
     this.localDB.changes({
@@ -96,6 +100,26 @@ export class Store {
         timestamp: {$gt: timeRange.start, $lt: timeRange.end}
       }
     }).then(docsResult => docsResult.docs as HabitExecution[]);
+  }
+
+
+  async getLatestHabitExecutions(habitIds: string[]): Promise<LatestHabitExecutions> {
+    const promises = habitIds.map(this.getLatestHabitExecution);
+    const resultList: HabitExecution[] = R.reject(R.isNil, await Promise.all(promises));
+    return R.indexBy(he => he.habitId, resultList);
+  }
+
+  getLatestHabitExecution = (habitId: string): Promise<HabitExecution | undefined> => {
+    return this.localDB.find({
+      selector: {
+        timestamp: {$gt: 0},
+        habitId: habitId
+      },
+      sort: [{timestamp: 'desc'}],
+      limit: 1
+    }).then(r => {
+      return r.docs[0] as HabitExecution;
+    });
   }
 
   // err.name === 'forbidden' => invalid username
