@@ -34,13 +34,39 @@ export function isRootNode(node: HabitTreeNode) {
 }
 
 
-type ExecutionCounts = { [habitId: string]: { direct: number, children: number } };
+type ExecutionCount = { direct: number, children: number };
+export type ExecutionCounts = { [habitId: string]: ExecutionCount };
 
-export function createExecutionCounts(executions: HabitExecutionContent[]): ExecutionCounts {
-  const executionCounts = R.mapObjIndexed((value: number, key) => ({
-    direct: value,
+export function createExecutionCounts(habitTree: HabitTree, executions: HabitExecutionContent[]): ExecutionCounts {
+  const directCounts = R.countBy(e => e.habitId, executions);
+
+  const executionCounts: ExecutionCounts = R.mapObjIndexed<HabitTreeNode, ExecutionCount, {}>(node => ({
+    direct: directCounts[node.habit._id] || 0,
     children: 0
-  }),                                     R.countBy(e => e.habitId, executions));
+  }),                                                                                         habitTree.habitTreeNodes);
+
+  const nodesFifo: HabitTreeNode[] = R.values(habitTree.habitTreeNodes)
+    .filter(node => R.isEmpty(node.children) && node.habit.parentId);
+
+  const countedHabitIds = new Set();
+
+  while (!R.isEmpty(nodesFifo)) {
+    const node = nodesFifo.shift()!;
+    if (countedHabitIds.has(node.habit._id)) {
+      continue;
+    }
+    countedHabitIds.add(node.habit._id);
+    const nodeExecutionCount = executionCounts[node.habit._id];
+    const parent = habitTree.habitTreeNodes[node.habit.parentId!];
+    if (parent) {
+      executionCounts[parent.habit._id].children += nodeExecutionCount.direct + nodeExecutionCount.children;
+      if (parent.habit.parentId) {
+        nodesFifo.push(parent);
+      }
+    }
+
+  }
+
   return executionCounts;
 }
 

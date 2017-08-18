@@ -3,14 +3,46 @@ import * as assert from 'assert';
 import {Habit, Types} from './model';
 
 describe('createExecutionCounts', () => {
+  const opa = mockHabit('opa');
+  const vater = mockHabit('vater', opa._id);
+  const kind1 = mockHabit('kind1', vater._id);
+  const kind2 = mockHabit('kind2', vater._id);
+
+  const habitTree = createHabitTree([opa, vater, kind1, kind2]);
+
+
   it('works with empty arrays', () => {
-    const result = createExecutionCounts([]);
-    assert.deepEqual(result, {});
+    const result = createExecutionCounts(habitTree, []);
+    assert.deepEqual(result, {
+      kind1: {children: 0, direct: 0},
+      kind2: {children: 0, direct: 0},
+      opa: {children: 0, direct: 0},
+      vater: {children: 0, direct: 0}
+    });
   });
 
   it('direct', () => {
-    const result = createExecutionCounts([{habitId: 'habit1', timestamp: 0}]);
-    assert.deepEqual(result, {habit1: {direct: 1, children: 0}});
+    const result = createExecutionCounts(habitTree, [{habitId: opa._id, timestamp: 0}]);
+    assert.deepEqual(result, {
+      kind1: {children: 0, direct: 0},
+      kind2: {children: 0, direct: 0},
+      opa: {children: 0, direct: 1},
+      vater: {children: 0, direct: 0}
+    });
+  });
+
+  it('add child values upwards', () => {
+    const result = createExecutionCounts(habitTree, [
+      {habitId: kind1._id, timestamp: 0},
+      {habitId: kind2._id, timestamp: 0},
+      {habitId: kind2._id, timestamp: 0}
+    ]);
+    assert.deepEqual(result, {
+      opa: {direct: 0, children: 3},
+      vater: {direct: 0, children: 3},
+      kind1: {direct: 1, children: 0},
+      kind2: {direct: 2, children: 0},
+    });
   });
 
 });

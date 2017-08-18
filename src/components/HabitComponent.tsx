@@ -1,9 +1,8 @@
 import * as R from 'ramda';
 import * as React from 'react';
 import './HabitComponent.css';
-import {ExecutionCounts} from './App';
 import {Store} from '../store';
-import {HabitTree, HabitTreeNode} from '../habit-tree';
+import {ExecutionCounts, HabitTree, HabitTreeNode} from '../habit-tree';
 import {LatestHabitExecutions, Rating} from '../model';
 import TimeAgo from 'react-timeago';
 import classNames = require('classnames');
@@ -48,13 +47,15 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
   render(): JSX.Element {
     const {habitNode, executionCounts, store, habitTree, editMode} = this.props;
     const habit = habitNode.habit;
-    const count = executionCounts[habit._id];
+    const executionCount = executionCounts[habit._id];
+    const directCount = (executionCount && executionCount.direct) || 0;
+    const childrenExecutionsCount = (executionCount && executionCount.children) || 0;
     const children = habitNode.children.map(id => habitTree.habitTreeNodes[id]);
     const latestExecution = this.props.latestHabitExecutions.latestByHabit[habit._id];
     return (
       <div
         className={classNames('habit', getRatingClassName(habit.rating), {
-          doneToday: count > 0
+          doneToday: directCount > 0
         })}
         key={habit._id}
       >
@@ -86,7 +87,10 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
         }
         {latestExecution ? <TimeAgo className="timeAgo" date={new Date(latestExecution.timestamp)}/> : ''}
         <div className="habitButtons">
-          <button onClick={() => store.executeHabit(habit)}>{count || '+'}</button>
+          {childrenExecutionsCount ?
+            <span className="childrenExecutionCount">{childrenExecutionsCount + directCount}</span> : []
+          }
+          <button onClick={() => store.executeHabit(habit)}>{directCount || '+'}</button>
           {editMode ? <button onClick={() => store.addHabit(habit._id)}>New</button> : []}
           {editMode ? <button onClick={() => store.deleteHabit(habit)}>x</button> : []}
         </div>
