@@ -1,6 +1,5 @@
 import {Habit, HabitExecution, LatestHabitExecutions, NewHabit, NewHabitExecution, Types} from './model';
-import {TimeRange} from './utils';
-import * as R from 'ramda';
+import {MILLISECONDS_IN_DAY, TimeRange} from './utils';
 import PouchDB from 'pouchdb';
 
 PouchDB.plugin(require('pouchdb-find').default);
@@ -104,9 +103,22 @@ export class Store {
 
 
   async getLatestHabitExecutions(habitIds: string[]): Promise<LatestHabitExecutions> {
-    const promises = habitIds.map(this.getLatestHabitExecution);
-    const resultList: HabitExecution[] = R.reject(R.isNil, await Promise.all(promises));
-    return R.indexBy(he => he.habitId, resultList);
+    const executionsLastMonth = (await this.localDB.find({
+      selector: {
+        timestamp: {$gt: Date.now() - MILLISECONDS_IN_DAY * 31},
+      },
+      sort: ['timestamp'],
+    })).docs as HabitExecution[];
+
+    const latestByHabit = {};
+    for (const execution of executionsLastMonth) {
+      latestByHabit[execution.habitId] = execution;
+    }
+
+    return {
+      latestByHabit
+    };
+
   }
 
   getLatestHabitExecution = (habitId: string): Promise<HabitExecution | undefined> => {

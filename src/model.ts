@@ -36,4 +36,7 @@ export function isRootHabit(habit: Habit) {
   return !habit.parentId;
 }
 
-export type LatestHabitExecutions = { [habbitId: string]: HabitExecution};
+export type LatestHabitExecutionsByHabit = { [habitId: string]: HabitExecution};
+export type LatestHabitExecutions = {
+  latestByHabit: LatestHabitExecutionsByHabit;
+};

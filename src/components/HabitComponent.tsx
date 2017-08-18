@@ -44,7 +44,7 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
     const habit = habitNode.habit;
     const count = executionCounts[habit._id];
     const children = habitNode.children.map(id => habitTree.habitTreeNodes[id]);
-    const latestExecution = this.props.latestHabitExecutions[habit._id];
+    const latestExecution = this.props.latestHabitExecutions.latestByHabit[habit._id];
     return (
       <div className="habit" key={habit._id}>
         {this.state.editingTitle ?
