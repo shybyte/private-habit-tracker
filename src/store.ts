@@ -1,6 +1,7 @@
 import {Habit, HabitExecution, LatestHabitExecutions, NewHabit, NewHabitExecution, Types} from './model';
 import {MILLISECONDS_IN_DAY, TimeRange} from './utils';
 import PouchDB from 'pouchdb';
+import * as R from 'ramda';
 
 PouchDB.plugin(require('pouchdb-find').default);
 PouchDB.plugin(require('pouchdb-authentication'));
@@ -53,7 +54,12 @@ export class Store {
   }
 
   addHabit = (parentId?: string) => {
-    const newHabit: NewHabit = {type: Types.habit, title: 'New', parentId};
+    const newHabit: NewHabit = {
+      type: Types.habit,
+      title: 'New',
+      rating: 0,
+      parentId
+    };
     this.localDB.post(newHabit);
   }
 
@@ -166,5 +172,18 @@ export class Store {
       return !!session.userCtx.name;
     });
   }
+
+  async upgradeDB() {
+    const habits = await this.getHabits();
+    habits.forEach(initRatingIfUndefined);
+    return this.localDB.bulkDocs(habits);
+  }
 }
+
+function initRatingIfUndefined(habit: Habit) {
+  if (R.isNil(habit.rating)) {
+    habit.rating = 1;
+  }
+}
+
 

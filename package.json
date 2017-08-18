@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "https://shybyte.github.io/private-habit-tracker",
   "dependencies": {
+    "@types/classnames": "^2.2.2",
     "@types/jest": "^20.0.6",
     "@types/lodash.throttle": "^4.1.2",
     "@types/node": "^8.0.20",
@@ -12,6 +13,7 @@
     "@types/ramda": "github:types/npm-ramda",
     "@types/react": "^16.0.2",
     "@types/react-dom": "^15.5.2",
+    "classnames": "^2.2.5",
     "gh-pages": "^1.0.0",
     "lodash.throttle": "^4.1.1",
     "pouchdb": "^6.3.4",

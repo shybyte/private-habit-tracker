@@ -1,3 +1,8 @@
+/**
+ * Value between -1 and 1, 1 is good, -1 is bad
+ */
+export type Rating = number;
+
 export enum Types {
   habit = 'habit',
   habitExecution = 'habitExecution'
@@ -12,6 +17,7 @@ export interface NewHabit {
   type: Types.habit;
   title: string;
   parentId?: string;
+  rating: Rating;
 }
 
 export interface Habit extends NewHabit, PouchDocument {

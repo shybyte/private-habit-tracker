@@ -4,8 +4,9 @@ import './HabitComponent.css';
 import {ExecutionCounts} from './App';
 import {Store} from '../store';
 import {HabitTree, HabitTreeNode} from '../habit-tree';
-import {LatestHabitExecutions} from '../model';
+import {LatestHabitExecutions, Rating} from '../model';
 import TimeAgo from 'react-timeago';
+import classNames = require('classnames');
 
 interface HabitComponentProps {
   habitTree: HabitTree;
@@ -25,6 +26,7 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
     editingTitle: false
   };
   titleInput: HTMLInputElement;
+  ratingInput: HTMLInputElement;
 
   startEditingTitle = () => {
     if (this.props.editMode) {
@@ -33,11 +35,15 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
   }
 
   onSubmit = (ev: React.SyntheticEvent<{}>) => {
+    console.log('onSubmit');
     ev.preventDefault();
-    this.props.store.saveHabit({...this.props.habitNode.habit, title: this.titleInput.value});
+    this.props.store.saveHabit({
+      ...this.props.habitNode.habit,
+      title: this.titleInput.value,
+      rating: parseFloat(this.ratingInput.value)
+    });
     this.setState({editingTitle: false});
   }
-
 
   render(): JSX.Element {
     const {habitNode, executionCounts, store, habitTree, editMode} = this.props;
@@ -46,7 +52,12 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
     const children = habitNode.children.map(id => habitTree.habitTreeNodes[id]);
     const latestExecution = this.props.latestHabitExecutions.latestByHabit[habit._id];
     return (
-      <div className="habit" key={habit._id}>
+      <div
+        className={classNames('habit', getRatingClassName(habit.rating), {
+          doneToday: count > 0
+        })}
+        key={habit._id}
+      >
         {this.state.editingTitle ?
           <form onSubmit={this.onSubmit}>
             <input
@@ -58,10 +69,22 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
                 }
               }}
             />
+            <input
+              type="number"
+              placeholder="multiple of 10"
+              step={1}
+              min={-1}
+              max={1}
+              defaultValue={'' + ( habit.rating || 0)}
+              ref={el => {
+                this.ratingInput = el!;
+              }}
+            />
+            <button>Save</button>
           </form>
-          : <span onClick={this.startEditingTitle}>{habit.title}</span>
+          : <span onClick={this.startEditingTitle} title={'Rating ' + habit.rating}>{habit.title}</span>
         }
-        {latestExecution ? <TimeAgo className="timeAgo" date={new Date(latestExecution.timestamp)}/>  : ''}
+        {latestExecution ? <TimeAgo className="timeAgo" date={new Date(latestExecution.timestamp)}/> : ''}
         <div className="habitButtons">
           <button onClick={() => store.executeHabit(habit)}>{count || '+'}</button>
           {editMode ? <button onClick={() => store.addHabit(habit._id)}>New</button> : []}
@@ -84,3 +107,14 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
 }
 
 export default HabitComponent;
+
+
+function getRatingClassName(rating: Rating) {
+  if (rating > 0) {
+    return 'positiveRating';
+  } else if (rating < 0) {
+    return 'negativeRating';
+  } else {
+    return 'neutralRating';
+  }
+}

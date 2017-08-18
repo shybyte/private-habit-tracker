@@ -43,8 +43,13 @@ function init() {
 
   window.addEventListener('online', render);
   window.addEventListener('offline', render);
+
+  if (getUrlParameter('upgradeDB') === 'true') {
+    store.upgradeDB();
+  }
 }
 
 // (window as any).init = init;
 
 init();
+

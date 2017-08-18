@@ -21,6 +21,7 @@ function mockHabit(title: string, parentId?: string): Habit {
     _id: title,
     _rev: '',
     type: Types.habit,
+    rating: 0,
     title,
     parentId,
   };
