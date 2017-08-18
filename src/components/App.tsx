@@ -58,9 +58,11 @@ class App extends React.Component<AppProps, AppState> {
     const {isLoggedIn, isOnline} = props;
     const state = this.state;
     const {editMode} = state;
-    const sortedRootHabitNodes = R.sortBy(n => n.habit.title, R.values(props.habitTree.habitTreeNodes).filter(isRootNode));
+    const rootHabitNodes = R.values(props.habitTree.habitTreeNodes)
+      .filter(isRootNode);
+    const sortedRootHabitNodes = R.sortBy(n => n.habit.title, rootHabitNodes);
     const selectedDate = this.selectedDate();
-    const dayStatistic = createDayStatistic(sortedRootHabitNodes.map(n => n.habit), state.executionCounts);
+    const dayStatistic = createDayStatistic(rootHabitNodes.map(n => n.habit), state.executionCounts);
     const selectedDateString = selectedDate.getDate() + '.'
       + (selectedDate.getMonth() + 1) + '.'
       + selectedDate.getFullYear();
@@ -132,6 +134,6 @@ function createDayStatistic(rootHabits: Habit[], executionCounts: ExecutionCount
 }
 
 interface DayStatistic {
-  positiveCount: number
+  positiveCount: number;
   negativeCount: number;
 }
