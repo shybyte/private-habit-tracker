@@ -19,3 +19,20 @@
 .offlineMarker {
     float: right;
 }
+
+.dayStatistic {
+    float: left;
+    /*text-align: right;*/
+    letter-spacing: 2px;
+}
+
+
+.positiveCount {
+    color: #0f0;
+}
+
+.negativeCount {
+    color: #f00;
+    padding-left: 0.5em;
+}
+

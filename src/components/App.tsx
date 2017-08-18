@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './App.css';
-import {LatestHabitExecutions} from '../model';
+import {Habit, LatestHabitExecutions} from '../model';
 import * as R from 'ramda';
 import HabitComponent from './HabitComponent';
 import {getDateRangeOfDay, MILLISECONDS_IN_DAY} from '../utils';
@@ -58,8 +58,9 @@ class App extends React.Component<AppProps, AppState> {
     const {isLoggedIn, isOnline} = props;
     const state = this.state;
     const {editMode} = state;
-    const sortedRootHabits = R.sortBy(n => n.habit.title, R.values(props.habitTree.habitTreeNodes).filter(isRootNode));
+    const sortedRootHabitNodes = R.sortBy(n => n.habit.title, R.values(props.habitTree.habitTreeNodes).filter(isRootNode));
     const selectedDate = this.selectedDate();
+    const dayStatistic = createDayStatistic(sortedRootHabitNodes.map(n => n.habit), state.executionCounts);
     const selectedDateString = selectedDate.getDate() + '.'
       + (selectedDate.getMonth() + 1) + '.'
       + selectedDate.getFullYear();
@@ -71,6 +72,10 @@ class App extends React.Component<AppProps, AppState> {
           {isOnline ? [] : <span className="offlineMarker">Offline</span>}
           <h2>Private Habit Tracker</h2>
           {isOnline && !isLoggedIn ? <Login store={props.store}/> : []}
+          <span className="dayStatistic">
+            <span className="positiveCount">+{dayStatistic.positiveCount}</span>
+            <span className="negativeCount">-{dayStatistic.negativeCount}</span>
+          </span>
           <label className="editModeCheckbox">
             <input type="checkbox" checked={editMode} onClick={this.onClickEditModeCheckBox}/> Edit
           </label>
@@ -79,9 +84,10 @@ class App extends React.Component<AppProps, AppState> {
             {selectedDateString}
             <button disabled={state.selectedDay >= 0} onClick={() => this.changeDayByDelta(1)}>&gt;</button>
           </div>
+
         </header>
         <main>
-          {sortedRootHabits.map(habitNode =>
+          {sortedRootHabitNodes.map(habitNode =>
             <HabitComponent
               key={habitNode.habit._id}
               habitNode={habitNode}
@@ -104,3 +110,28 @@ class App extends React.Component<AppProps, AppState> {
 }
 
 export default App;
+
+function createDayStatistic(rootHabits: Habit[], executionCounts: ExecutionCounts): DayStatistic {
+  let positiveCount = 0;
+  let negativeCount = 0;
+
+  for (const habit of rootHabits) {
+    const executionCount = executionCounts[habit._id];
+    if (!executionCount) {
+      continue;
+    }
+    const executionCountComplete = executionCount.children + executionCount.direct;
+    if (habit.rating > 0) {
+      positiveCount += executionCountComplete;
+    } else if (habit.rating < 0) {
+      negativeCount += executionCountComplete;
+    }
+  }
+
+  return {positiveCount, negativeCount};
+}
+
+interface DayStatistic {
+  positiveCount: number
+  negativeCount: number;
+}
