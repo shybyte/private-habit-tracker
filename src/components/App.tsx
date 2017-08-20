@@ -63,7 +63,7 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   executeHabit = (habit: Habit) => {
-    if (this.state.editMode) {
+    if (this.state.editMode || this.state.selectedDay !== 0) {
       this.setState({executeHabitDialog: habit});
     } else {
       this.props.store.executeHabit(habit);
@@ -101,21 +101,23 @@ class App extends React.Component<AppProps, AppState> {
           contentLabel="Example Modal"
           className="dialog"
         >
+          Record Habit for {selectedDateString}
           <form onSubmit={this.onSubmitExecution}>
-          <input
-            type="number"
-            placeholder="Hour"
-            step={1}
-            min={0}
-            max={24}
-            defaultValue={'' + new Date().getHours()}
-            ref={el => {
-              if (el) {
-                this.hourInput = el!;
-                el.focus();
-              }
-            }}
-          />
+            <label>Hour:</label>
+            <input
+              type="number"
+              placeholder="Hour"
+              step={1}
+              min={0}
+              max={24}
+              defaultValue={'' + new Date().getHours()}
+              ref={el => {
+                if (el) {
+                  this.hourInput = el!;
+                  el.focus();
+                }
+              }}
+            />
             <button>Save</button>
           </form>
         </Modal>

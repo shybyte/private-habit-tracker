@@ -39,12 +39,19 @@
 .dialog {
     background: white;
     border: silver 1px solid;
-    border-radius: 10px;
+    border-radius: 5px;
     padding: 10px;
-    max-width: 10em;
+    max-width: 13em;
     margin: 50px auto;
+    background: #ffa;
+    line-height: 1.5em;
+    box-shadow: 5px 5px 10px 5px rgba(0,0,0,0.4);
 }
 
 .dialog button {
     float: right;
+}
+
+.dialog label {
+    padding-right: 0.5em;
 }
