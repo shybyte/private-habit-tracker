@@ -3,7 +3,7 @@ import * as React from 'react';
 import './HabitComponent.css';
 import {Store} from '../store';
 import {ExecutionCounts, HabitTree, HabitTreeNode} from '../habit-tree';
-import {LatestHabitExecutions, Rating} from '../model';
+import {Habit, LatestHabitExecutions, Rating} from '../model';
 import TimeAgo from 'react-timeago';
 import classNames = require('classnames');
 
@@ -14,6 +14,7 @@ interface HabitComponentProps {
   executionCounts: ExecutionCounts;
   store: Store;
   editMode: boolean;
+  executeHabit: (habit: Habit) => void;
 }
 
 interface HabitComponentState {
@@ -72,7 +73,7 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
             />
             <input
               type="number"
-              placeholder="multiple of 10"
+              placeholder="Rating"
               step={1}
               min={-1}
               max={1}
@@ -90,7 +91,7 @@ class HabitComponent extends React.Component<HabitComponentProps, HabitComponent
           {childrenExecutionsCount ?
             <span className="childrenExecutionCount">{childrenExecutionsCount + directCount}</span> : []
           }
-          <button onClick={() => store.executeHabit(habit)}>{directCount || '+'}</button>
+          <button onClick={() => this.props.executeHabit(habit)}>{directCount || '+'}</button>
           {editMode ? <button onClick={() => store.addHabit(habit._id)}>New</button> : []}
           {editMode ? <button onClick={() => store.deleteHabit(habit)}>x</button> : []}
         </div>

@@ -1,9 +1,10 @@
 import * as React from 'react';
+import Modal from 'react-modal';
 import './App.css';
 import {Habit, LatestHabitExecutions} from '../model';
 import * as R from 'ramda';
 import HabitComponent from './HabitComponent';
-import {getDateRangeOfDay, MILLISECONDS_IN_DAY} from '../utils';
+import {getDateForHour, getDateRangeOfDay, MILLISECONDS_IN_DAY} from '../utils';
 import {Store} from '../store';
 import Login from './Login';
 import {createExecutionCounts, ExecutionCounts, HabitTree, isRootNode} from '../habit-tree';
@@ -20,13 +21,17 @@ interface AppState {
   executionCounts: ExecutionCounts;
   selectedDay: number;  // 0 = today, -1 = yesterday ...
   editMode: boolean;
+  executeHabitDialog?: Habit;
 }
 
 class App extends React.Component<AppProps, AppState> {
+  hourInput: HTMLInputElement;
+
   state = {
     executionCounts: {},
     selectedDay: 0,
     editMode: false,
+    executeHabitDialog: undefined
   };
 
   async componentDidMount() {
@@ -53,6 +58,28 @@ class App extends React.Component<AppProps, AppState> {
     this.props.store.logout();
   }
 
+  closeModal = () => {
+    this.setState({executeHabitDialog: undefined});
+  }
+
+  executeHabit = (habit: Habit) => {
+    if (this.state.editMode) {
+      this.setState({executeHabitDialog: habit});
+    } else {
+      this.props.store.executeHabit(habit);
+    }
+  }
+
+  onSubmitExecution = (ev: React.SyntheticEvent<{}>) => {
+    console.log('onSubmitExecution');
+    ev.preventDefault();
+    const hours = parseInt(this.hourInput.value, 10);
+    const date = getDateForHour(this.selectedDate(), hours);
+    this.props.store.executeHabit(this.state.executeHabitDialog!, date);
+    this.closeModal();
+  }
+
+
   render() {
     const props = this.props;
     const {isLoggedIn, isOnline} = props;
@@ -68,6 +95,30 @@ class App extends React.Component<AppProps, AppState> {
       + selectedDate.getFullYear();
     return (
       <div className="app">
+        <Modal
+          isOpen={!!this.state.executeHabitDialog}
+          onRequestClose={this.closeModal}
+          contentLabel="Example Modal"
+          className="dialog"
+        >
+          <form onSubmit={this.onSubmitExecution}>
+          <input
+            type="number"
+            placeholder="Hour"
+            step={1}
+            min={0}
+            max={24}
+            defaultValue={'' + new Date().getHours()}
+            ref={el => {
+              if (el) {
+                this.hourInput = el!;
+                el.focus();
+              }
+            }}
+          />
+            <button>Save</button>
+          </form>
+        </Modal>
         <header className="header">
           {isLoggedIn && isOnline ? <button className="logoutButton" onClick={this.onLogout}>Logout</button> :
             []}
@@ -98,6 +149,7 @@ class App extends React.Component<AppProps, AppState> {
               executionCounts={this.state.executionCounts}
               store={props.store}
               editMode={editMode}
+              executeHabit={this.executeHabit}
             />
           )}
           {editMode ? <button onClick={() => props.store.addHabit()}>+</button> : []}

@@ -13,6 +13,7 @@
     "@types/ramda": "github:types/npm-ramda",
     "@types/react": "^16.0.2",
     "@types/react-dom": "^15.5.2",
+    "@types/react-modal": "^2.2.0",
     "classnames": "^2.2.5",
     "gh-pages": "^1.0.0",
     "lodash.throttle": "^4.1.1",
@@ -22,6 +23,7 @@
     "ramda": "^0.24.1",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
+    "react-modal": "^2.2.4",
     "react-scripts-ts": "2.5.0",
     "react-timeago": "^3.4.3"
   },
