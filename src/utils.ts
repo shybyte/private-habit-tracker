@@ -5,10 +5,20 @@ export interface TimeRange {
   end: number;
 }
 
+function getBeginningOfDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
 export function getDateRangeOfDay(date: Date): TimeRange {
-  const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const startDate = getBeginningOfDay(date);
   const endDate = new Date(startDate.getTime() + MILLISECONDS_IN_DAY);
   return {start: startDate.getTime(), end: endDate.getTime()};
+}
+
+export function getDateForHour(date: Date, hour: number) {
+  const result = getBeginningOfDay(date);
+  result.setHours(hour);
+  return result;
 }
 
 export function getUrlParameter(nameArg: string) {
